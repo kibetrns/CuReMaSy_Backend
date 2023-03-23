@@ -1,0 +1,6 @@
+-- Drop tables
+DROP TABLE IF EXISTS notifications
+DROP TABLE IF EXISTS products
+DROP TABLE IF EXISTS categories
+DROP TABLE IF EXISTS sales
+DROP TABLE IF EXISTS users 
