@@ -22,6 +22,7 @@ BEGIN
     VALUES (@user_type, @user_name, @email, @password, @full_name, @phone_number, @date_of_birth, 
             GETUTCDATE(), 0, @profile_picture);
 
+    SELECT SCOPE_IDENTITY() AS user_id;
 END;
 GO
 
@@ -79,6 +80,20 @@ BEGIN
 END
 GO
 
+/** Procudure for soft deleting a user **/
+CREATE PROCEDURE sp_SoftDeleteUser
+    @user_id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE users
+    SET is_account_deleted = 1
+    WHERE user_id = @user_id;
+END
+GO
+
+
 /** Procudure for getting a user by userID **/
 CREATE PROCEDURE sp_GetUserByID
     @user_id INT
@@ -124,7 +139,7 @@ BEGIN
     FROM 
         users
     ORDER BY 
-        user_id
+        user_id ASC
     OFFSET (@pageNumber - 1) * @pageSize ROWS 
     FETCH NEXT @pageSize ROWS ONLY;
 END
