@@ -1,6 +1,7 @@
 const express = require('express')
 require('dotenv').config();
 const adminRouter = require('./routes/admin-routes')
+const usersRouter = require('./routes/users-routes')
 
 const app = express()
 
@@ -21,6 +22,7 @@ app.get('/', (req, res) => {
 
 
 app.use('/user', adminRouter);
+app.use('/users', usersRouter)
 
 
 const port = process.env.PORT

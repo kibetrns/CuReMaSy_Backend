@@ -40,7 +40,6 @@ const createUserSchema = Joi.object({
         .optional()
 })
 
-
 const loginUserSchema = Joi.object({
 
     email: Joi
@@ -53,13 +52,19 @@ const loginUserSchema = Joi.object({
         .min(8)
         .required(),
 
-    userTypeSchema: Joi
+    userType: Joi
         .string()
         .valid('SUPER ADMIN', 'Admin', 'Staff')
         .required(),       
 })
 
 const editUserSchema = Joi.object({
+
+
+    userId: Joi
+        .number()
+        .integer()
+        .required(),
 
     email: Joi
         .string()
@@ -86,13 +91,56 @@ const editUserSchema = Joi.object({
         .date()
         .max("now"),
     
-    userTypeSchema: Joi
+    userType: Joi
     .string()
     .valid('SUPER ADMIN', 'Admin', 'Staff', 'Customer'),
+
+    profilePicture: Joi
+        .binary()
+        .max(15728640)
+        .optional(),
+
+    isAccountDeleted: Joi
+        .valid(0,1)  
+})
+
+const deleteUserSchema = Joi.object({
+    userId: Joi
+        .number()
+        .integer()
+        .required()
+})
+
+const getUserByIdSchema = Joi.object({
+    userId: Joi
+        .number()
+        .integer()
+        .required()
+})
+
+const getUserByEmailSchema = Joi.object({
+    email: Joi
+        .string()
+        .max(99)
+})
+
+const getUsersSchema = Joi.object({
+    pageNumber: Joi
+        .number()
+        .integer()
+        .required(),
+    pageSize: Joi
+        .number()
+        .integer()
+        .required()
 })
 
 module.exports = {
     createUserSchema,
     editUserSchema,
     loginUserSchema, 
+    deleteUserSchema,
+    getUserByIdSchema,
+    getUserByEmailSchema,
+    getUsersSchema
 }
