@@ -1,6 +1,16 @@
--- Drop tables
-DROP TABLE IF EXISTS notifications
-DROP TABLE IF EXISTS products
-DROP TABLE IF EXISTS categories
-DROP TABLE IF EXISTS sales
-DROP TABLE IF EXISTS users 
+USE CuReMaSy_DB;
+GO
+
+DROP TABLE IF EXISTS sale_products;
+DROP TABLE IF EXISTS sales;
+DROP TABLE IF EXISTS notifications;
+DROP TABLE IF EXISTS products;
+DROP TABLE IF EXISTS categories;
+DROP TABLE IF EXISTS users;
+GO
+
+USE master;
+GO
+
+DROP DATABASE IF EXISTS CuReMaSy_DB;
+GO
