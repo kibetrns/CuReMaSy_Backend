@@ -1,6 +1,3 @@
-USE CuReMaSy_DB
-GO
-
 /*****************************************************************************USERS*****************************************************************************************/
 
 /**Procedure  for creating user **/
@@ -12,15 +9,16 @@ CREATE PROCEDURE sp_CreateUser
     @full_name VARCHAR(99),
     @phone_number VARCHAR(20),
     @date_of_birth DATE,
-    @profile_picture VARBINARY(MAX)
+    @profile_picture VARBINARY(MAX),
+    @loyalty_points INT
 AS
 BEGIN
     SET NOCOUNT ON;
 
     INSERT INTO users (user_type, user_name, email, [password], full_name, phone_number, date_of_birth,
-                       account_creation_date, is_account_deleted, profile_picture)
+                       account_creation_date, is_account_deleted, profile_picture, loyalty_points)
     VALUES (@user_type, @user_name, @email, @password, @full_name, @phone_number, @date_of_birth, 
-            GETUTCDATE(), 0, @profile_picture);
+            GETUTCDATE(), 0, @profile_picture, @loyalty_points);
 
     SELECT SCOPE_IDENTITY() AS user_id;
 END;
@@ -38,7 +36,9 @@ CREATE PROCEDURE sp_EditUser
     @phone_number VARCHAR(20),
     @date_of_birth DATE,
     @is_account_deleted BIT,
-    @profile_picture VARBINARY(MAX)
+    @profile_picture VARBINARY(MAX),
+    @loyalty_points INT
+
 )
 AS
 BEGIN
@@ -51,7 +51,9 @@ BEGIN
         phone_number = @phone_number,
         date_of_birth = @date_of_birth,
         is_account_deleted = @is_account_deleted,
-        profile_picture = @profile_picture
+        profile_picture = @profile_picture,
+        loyalty_points = @loyalty_points
+
     WHERE user_id = @user_id;
 END
 GO
@@ -135,11 +137,12 @@ BEGIN
         date_of_birth,
         account_creation_date,
         is_account_deleted,
-        profile_picture
+        profile_picture,
+        loyalty_points
     FROM 
         users
     ORDER BY 
-        user_id ASC
+        user_id DESC
     OFFSET (@pageNumber - 1) * @pageSize ROWS 
     FETCH NEXT @pageSize ROWS ONLY;
 END
@@ -212,7 +215,7 @@ BEGIN
 
     IF @@ROWCOUNT = 0
     BEGIN
-        RAISERROR('Product with ID  does not exist.', 16, 1)
+        RAISERROR('Product with provided ID  does not exist.', 16, 1)
         RETURN
     END
 END
@@ -234,7 +237,7 @@ BEGIN
 
     IF NOT EXISTS(SELECT 1 FROM products WHERE product_id = @product_id)
     BEGIN
-        RAISERROR('The product with ID  does not exist.', 16, 1)
+        RAISERROR('The product with provided ID  does not exist.', 16, 1)
         RETURN
     END
     
@@ -446,7 +449,7 @@ BEGIN
 
     IF @@ROWCOUNT = 0
     BEGIN
-            RAISERROR('Category with ID does not exist.', 16, 1)
+            RAISERROR('Category with provided ID does not exist.', 16, 1)
         RETURN
     END
 END
@@ -468,7 +471,7 @@ BEGIN
 
     IF NOT EXISTS(SELECT 1 FROM categories WHERE category_id = @category_id)
     BEGIN
-        RAISERROR('The category with ID  does not exist.', 16, 1)
+        RAISERROR('The category with provided ID  does not exist.', 16, 1)
         RETURN
     END
     
@@ -569,29 +572,6 @@ GO
 
 /*********************************************************************************SALES************************************************************************************/
 
---Procedure for deleting a sale
-CREATE PROCEDURE sp_DeleteSale
-    @sale_id INT,
-    @user_id INT
-AS
-BEGIN
-
-    IF NOT EXISTS(SELECT 1 FROM users WHERE user_id = @user_id AND user_type IN ('Admin', 'SUPER ADMIN', 'Staff'))
-    BEGIN
-        RAISERROR('User is not authorized to delete sales.', 16, 1)
-        RETURN
-    END
-
-    DELETE FROM sales WHERE sale_id = @sale_id
-
-    IF @@ROWCOUNT = 0
-    BEGIN
-        RAISERROR('Sale with ID does not exist.', 16, 1)
-        RETURN
-    END
-END
-GO
-
 --Procedure for adding a product to a sale
 CREATE PROCEDURE sp_AddProductToSale 
     @sale_id INT,
@@ -615,7 +595,7 @@ BEGIN
     
     IF EXISTS (SELECT 1 FROM sale_products WHERE sale_id = @sale_id AND product_id = @product_id)
     BEGIN
-        RAISERROR('Product with id has already been added to sale id', 16, 1);
+        RAISERROR('Product with provided id has already been added to sale id', 16, 1);
         RETURN;
     END
     
@@ -661,8 +641,7 @@ BEGIN
 END
 GO
 
-
-
+/*Making a sale*/
 CREATE PROCEDURE sp_createSale
     @seller_id INT,
     @customer_id INT,
@@ -695,6 +674,14 @@ BEGIN
         INSERT INTO sale_products (sale_id, product_id, quantity)
         VALUES (@sale_id, @product_id, @quantity);
 
+        -- Increment the loyalty points for the customer
+        IF @customer_id IS NOT NULL
+        BEGIN
+            UPDATE users
+            SET loyalty_points = loyalty_points + @quantity
+            WHERE user_id = @customer_id;
+        END
+
         SET @counter += 1;
     END
 
@@ -703,16 +690,19 @@ BEGIN
 END
 GO
 
-
-
-
-
-/**Procedure for deleting a sale **/
+--Procedure for deleting a sale
 CREATE PROCEDURE sp_DeleteSale
-    @sale_id INT
+    @sale_id INT,
+    @user_id INT
 AS
 BEGIN
     SET NOCOUNT ON;
+
+    IF NOT EXISTS(SELECT 1 FROM users WHERE user_id = @user_id AND user_type IN ('Admin', 'SUPER ADMIN', 'Staff'))
+    BEGIN
+        RAISERROR('User is not authorized to delete sales.', 16, 1)
+        RETURN
+    END
 
     -- Delete the sale from the sales table
     DELETE FROM sales WHERE sale_id = @sale_id;
@@ -720,10 +710,17 @@ BEGIN
     -- Delete any associated records in the sale_products table
     DELETE FROM sale_products WHERE sale_id = @sale_id;
 
+    IF @@ROWCOUNT = 0
+    BEGIN
+        RAISERROR('Sale with provided ID does not exist.', 16, 1)
+        RETURN
+    END
+
     -- Print a message indicating success
     PRINT 'Sale deleted successfully.'
 END
 GO
+
 
 /*Procedure for editing a sale*/
 CREATE PROCEDURE sp_EditSale

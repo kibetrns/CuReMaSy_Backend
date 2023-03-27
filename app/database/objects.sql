@@ -10,15 +10,16 @@ GO
 CREATE TABLE users(
     user_id INT PRIMARY KEY IDENTITY (101, 1),
     user_type VARCHAR(42) CONSTRAINT chk_user_type CHECK(user_type IN ('SUPER ADMIN', 'Admin', 'Staff', 'Customers')) NOT NULL,
-    user_name VARCHAR(42) UNIQUE NOT NULL, 
+    user_name VARCHAR(42) UNIQUE , 
     email VARCHAR(99) UNIQUE NOT NULL,
     [password] VARCHAR(99) NOT NULL,
-    full_name VARCHAR(99),
+    full_name VARCHAR(99) NOT NULL,
     phone_number VARCHAR(20),
     date_of_birth DATE,
     account_creation_date DATETIME2,
     is_account_deleted BIT,
-    profile_picture VARBINARY(MAX)
+    profile_picture VARBINARY(MAX),
+    loyalty_points INT DEFAULT 0 
 )
 GO
 
@@ -44,7 +45,7 @@ CREATE TABLE products(
 GO
 
 CREATE TABLE sales(
-    sale_id UNIQUEIDENTIFIER IDENTITY(1,1) PRIMARY KEY,
+    sale_id INT IDENTITY(1,1) PRIMARY KEY,
     seller_id INT FOREIGN KEY REFERENCES users(user_id),
     customer_id INT FOREIGN KEY REFERENCES users(user_id),
     sale_date DATETIME2,
@@ -57,7 +58,7 @@ GO
 
 
 CREATE TABLE sale_products (
-    sale_id UNIQUEIDENTIFIER FOREIGN KEY REFERENCES sales(sale_id),
+    sale_id INT FOREIGN KEY REFERENCES sales(sale_id),
     product_id UNIQUEIDENTIFIER FOREIGN KEY REFERENCES products(product_id),
     quantity INT,
     PRIMARY KEY (sale_id, product_id)
