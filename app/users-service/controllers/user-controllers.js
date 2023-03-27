@@ -163,13 +163,12 @@ module.exports = {
                       const result = await request.execute('sp_DeleteUser')
                       console.log(result)
 
-                      const user = result.recordset[0];
 
                     
                       await pool.close();
 
 
-                      if (user) {   
+                      if (result.rowsAffected.length > 0) {   
                          res.status(200).json(user);
                         } else {
                             res.status(404).json({

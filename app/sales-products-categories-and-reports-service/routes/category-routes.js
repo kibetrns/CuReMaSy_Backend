@@ -1,6 +1,6 @@
 const categoryRouter = require('express').Router();
 
-const { SchemaValidateMiddleWare } = require('./../middleware/schema-validate')
+const { SchemaValidateMiddleWare } = require('../middlewares/schema-validate')
 const { 
     createCategorySchema,
     editCategorySchema,

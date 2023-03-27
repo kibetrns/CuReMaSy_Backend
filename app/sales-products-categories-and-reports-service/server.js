@@ -4,6 +4,9 @@ require('dotenv').config();
 const productRouter = require('./routes/product-routes')
 const productsRouter = require('./routes/products-router')
 
+const categoryRouter = require('./routes/category-routes')
+const categoriesRouter = require('./routes/categories-routes')
+
 
 const app = express()
 
@@ -19,14 +22,18 @@ app.use((req, res, next) => {
 
 
 app.get('/', (req, res) => {
-    res.json({ message: 'Touched down on sales-and-products-service' })
+    res.json({ message: 'sales-products-categories-and-reports-service' })
 })
 
 
 app.use('/product', productRouter);
 app.use('/products', productsRouter);
 
+app.use('/category', categoryRouter);
+app.use('/categories', categoriesRouter);
+
+
 
 
 const port = process.env.PORT
-app.listen(port, () => { console.log(`User-Service Server running on port ${port}`) })
+app.listen(port, () => { console.log(`sales-products-categories-and-reports-service Server running on port ${port}`) })

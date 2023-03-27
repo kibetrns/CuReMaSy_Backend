@@ -1,6 +1,6 @@
 const categoriesRouter = require('express').Router();
 
-const { SchemaValidateMiddleWare } = require('../middleware/schema-validate')
+const { SchemaValidateMiddleWare } = require('../middlewares/schema-validate')
 const { getCategoriesSchema } = require('../services/joi-services')
 
 const { getCategories } = require('../controllers/categories-controllers')

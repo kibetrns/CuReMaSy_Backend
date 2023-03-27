@@ -1,6 +1,6 @@
 const productsRouter = require('express').Router();
 
-const { SchemaValidateMiddleWare } = require('./../middlewares/schema-validate')
+const { SchemaValidateMiddleWare } = require('../middlewares/schema-validate')
 const { 
    
     getProductsSchema
